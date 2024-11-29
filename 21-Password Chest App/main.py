@@ -2,6 +2,9 @@ import tkinter as tk
 import random
 import string
 from tkinter import messagebox
+import json
+
+
 BGCOLOR='#F1F2F2'
 EMAILLABEL='E-mail/Username'
 WEBSITE='Website'
@@ -9,13 +12,55 @@ PASS='Password'
 GENBUTTON='Generate'
 ADD='Add'
 
+
+
+# ---------------------------- SEARCH BUTTON  ------------------------------- #
+
+def searchbuttonclicked():
+    website=website_text.get("1.0", tk.END).lower()
+
+    try:
+        with open("21-Password Chest App\data.json", "r") as my_file:
+            data= json.load(my_file)
+            email= data[f"{website}"]['email']
+            password=data[f"{website}"]['password']
+            messagebox.askokcancel(message=f'Your e mail: {email}\nYour password:{password}')
+    except FileNotFoundError:
+            messagebox.askokcancel(message='There is no such file.')
+    except KeyError:
+            messagebox.askokcancel(message=f'{website} is not found.')
+
+
+
+
+
 # ---------------------------- ADD BUTTON  ------------------------------- #
 def addbuttonclicked():
-     message= messagebox.askokcancel(message=f'{WEBSITE}:{website_text.get("1.0", tk.END)}\n{EMAILLABEL}:{email_text.get("1.0", tk.END)}\n{PASS}:{password_text.get("1.0", tk.END)}\nAre these vallues are ok?')
-     if message:
-        with open("21-Password Chest App\password.txt", "a") as my_file:
-            my_file.write(f'{WEBSITE}:{website_text.get("1.0", tk.END)}|||{EMAILLABEL}:{email_text.get("1.0", tk.END)}|||{PASS}:{password_text.get("1.0", tk.END)}\n')
+     website=website_text.get("1.0", tk.END).lower()
+     email=email_text.get("1.0", tk.END).lower()
+     password=password_text.get("1.0", tk.END)
 
+     new_json_data={
+        website: {'email': email,
+                'password':password}}
+
+     message= messagebox.askokcancel(message=f'{WEBSITE}:{website_text.get("1.0", tk.END)}\n{EMAILLABEL}:{email_text.get("1.0", tk.END)}\n{PASS}:{password_text.get("1.0", tk.END)}\nAre these vallues are ok?')
+     
+     if message:
+
+        try:
+            with open("21-Password Chest App\data.json", "r") as my_file:
+                data= json.load(my_file)
+            #my_file.write(f'{WEBSITE}:{website_text.get("1.0", tk.END)}|||{EMAILLABEL}:{email_text.get("1.0", tk.END)}|||{PASS}:{password_text.get("1.0", tk.END)}\n')
+        except FileNotFoundError:
+            with open("21-Password Chest App\data.json", "w") as my_file:
+                json.dump(new_json_data,my_file)
+
+        else:
+            with open("21-Password Chest App\data.json", "w") as my_file:
+            #my_file.write(f'{WEBSITE}:{website_text.get("1.0", tk.END)}|||{EMAILLABEL}:{email_text.get("1.0", tk.END)}|||{PASS}:{password_text.get("1.0", tk.END)}\n')
+                data.update(new_json_data)
+                json.dump(data,my_file,indent=4)
 
 
 
@@ -61,8 +106,8 @@ email_text.insert('1.0', "example@gmail.com")
 website_label=tk.Label(width=7, height=2 , text=WEBSITE , font=('Adorno' , 10  , 'bold') )
 website_label.grid(column=0,row=2)
 
-website_text=tk.Text(width=60, height=1, font=('Adorno' , 10  , 'normal') )
-website_text.grid(column=1,row=2)
+website_text=tk.Text(width=50, height=1, font=('Adorno' , 10  , 'normal') )
+website_text.grid(column=1,row=2,sticky="w")
 
 # ---------------------------- PASS SETUP ------------------------------- #
 
@@ -84,6 +129,11 @@ generatebutton.grid(column=1,row=3,sticky="E")
 
 addbutton=tk.Button(width=30, height=2 , text=ADD , font=('Adorno' , 10  , 'bold'), command=addbuttonclicked) 
 addbutton.grid(column=0,row=5,columnspan=3)
+
+
+# ---------------------------- SEARCH BUTTON SETUP ------------------------------- #
+searchbutton=tk.Button(width=8, height=2 , text='Search' , font=('Adorno' , 9  , 'bold'), command=searchbuttonclicked) 
+searchbutton.grid(column=1,row=2,sticky="E")
 
 
 window.mainloop()
